@@ -18,7 +18,6 @@ import java.util.List;
  * {@link CustomerController} class
  *
  * @author Angel Lecuona
- *
  */
 @RestController
 @RequestMapping(path = "/customers", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,7 +43,10 @@ public class CustomerController {
                     new RestResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage()),
                     HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(customer, HttpStatus.OK);
+
+        return new ResponseEntity<>(
+                (customer != null) ? customer :
+                        new RestResponse(HttpStatus.OK.value(),"Resource not found"), HttpStatus.OK);
     }
 
     /**
@@ -69,7 +71,7 @@ public class CustomerController {
     /**
      * Save the costumer
      *
-     * @param request {@link HttpServletRequest}
+     * @param request  {@link HttpServletRequest}
      * @param customer to save
      * @return a wrapper {@link ResponseEntity}
      */
@@ -93,8 +95,8 @@ public class CustomerController {
     /**
      * Update an specific costumer
      *
-     * @param request HttpServletRequest
-     * @param customer to update
+     * @param request    HttpServletRequest
+     * @param customer   to update
      * @param customerId
      * @return
      */

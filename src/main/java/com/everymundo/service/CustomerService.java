@@ -76,24 +76,23 @@ public class CustomerService {
      */
     public Customer findById(String id) throws CustomServiceException{
         Customer customerResult = customerRepository.findOne(id);
+        if(customerResult!=null) {
+            String uri = "/customers/" + id + "/orders";
+            String baseURL = getStringBuilder("ORDER-SERVICE", uri);
 
-        String uri = "/customers/" + id + "/orders";
-        String baseURL = getStringBuilder("ORDER-SERVICE", uri);
+            ResponseEntity<String> response;
 
-        ResponseEntity<String> response;
-
-        try{
-            response = restTemplate.exchange(baseURL, HttpMethod.GET, null,String.class);
-            List<Order> orders = new ArrayList<>();
-            orders = objectMapper.readValue(response.getBody(), objectMapper.getTypeFactory().constructCollectionType(List.class, Order.class));
-            customerResult.setOrders(orders);
+            try {
+                response = restTemplate.exchange(baseURL, HttpMethod.GET, null, String.class);
+                List<Order> orders = new ArrayList<>();
+                orders = objectMapper.readValue(response.getBody(), objectMapper.getTypeFactory().constructCollectionType(List.class, Order.class));
+                customerResult.setOrders(orders);
+            } catch (JsonParseException | JsonMappingException e) {
+                throw new CustomServiceException("Error occurred handling Json value", e.getCause());
+            } catch (IOException e) {
+                throw new CustomServiceException("Input/Output error", e.getCause());
+            }
         }
-        catch(  JsonParseException | JsonMappingException e){
-            throw new CustomServiceException("Error occurred handling Json value", e.getCause());
-        } catch (IOException e) {
-            throw new CustomServiceException("Input/Output error", e.getCause());
-        }
-
         return customerResult;
     }
 
